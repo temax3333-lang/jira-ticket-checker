@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initialize Groq client
+# Initialize Groq client (lazy loading)
 @st.cache_resource
 def get_client():
     try:
@@ -26,7 +26,9 @@ def get_client():
         else:
             st.error("❌ GROQ_API_KEY not found in secrets or environment variables. Please set it up.")
             return None
-client = get_client()
+
+# Don't initialize client at startup - do it lazily when needed
+client = None
 
 # ============================================
 # YOUR EXACT WORKFLOW FROM THE TABLE
@@ -397,6 +399,12 @@ Evidence: [Attached: filename]
 """
                 
                 # Call Groq API
+                if client is None:
+                    client = get_client()
+                if client is None:
+                    st.error("❌ Cannot analyze ticket - API key not configured")
+                    st.stop()
+                    
                 response = client.chat.completions.create(
                     model="llama-3.3-70b-versatile",
                     messages=[
