@@ -14,8 +14,7 @@ st.set_page_config(
 # Initialize Groq client
 @st.cache_resource
 def get_client():
-    return Groq(api_key="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")
-
+    return Groq(api_key=os.environ["GROQ_API_KEY"])
 client = get_client()
 
 # ============================================
