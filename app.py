@@ -14,7 +14,18 @@ st.set_page_config(
 # Initialize Groq client
 @st.cache_resource
 def get_client():
-    return Groq(api_key=os.environ["GROQ_API_KEY"])
+    try:
+        api_key = st.secrets["GROQ_API_KEY"]
+        return Groq(api_key=api_key)
+    except (KeyError, FileNotFoundError):
+        # Fallback to environment variable for local development
+        import os
+        api_key = os.environ.get("GROQ_API_KEY")
+        if api_key:
+            return Groq(api_key=api_key)
+        else:
+            st.error("❌ GROQ_API_KEY not found in secrets or environment variables. Please set it up.")
+            return None
 client = get_client()
 
 # ============================================
