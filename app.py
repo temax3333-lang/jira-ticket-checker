@@ -229,23 +229,27 @@ with col1:
             
             current_stage = st.selectbox(
                 "Current Stage",
-                stage_options[:6]  # First 6
+                stage_options[:6],  # First 6
+                key="current_stage_1"
             )
             
             current_stage2 = st.selectbox(
                 "Continued",
-                stage_options[6:12]  # Next 6
+                stage_options[6:12],  # Next 6
+                key="current_stage_2"
             )
             
             current_stage3 = st.selectbox(
                 "Final Stages",
-                stage_options[12:]  # Last 5
+                stage_options[12:],  # Last 5
+                key="current_stage_3"
             )
             
             ticket_type = st.selectbox(
                 "Issue Category",
                 ["Type Change Request", "Biometric Issue", "Stuck Application", 
-                 "Data Error", "Cancellation Request", "Payment Issue", "Status & Workflow Issues"]
+                 "Data Error", "Cancellation Request", "Payment Issue", "Status & Workflow Issues"],
+                key="ticket_type"
             )
             priority = st.select_slider(
                 "Priority",
@@ -292,7 +296,7 @@ with col2:
             return 'background-color: #4CAF50; color: white'
         return ''
     
-    st.dataframe(workflow_df.style.applymap(color_type, subset=['Owner']), height=400)
+    st.dataframe(workflow_df.style.map(color_type, subset=['Owner']), height=400)
     
     st.markdown("### 💡 Tips for Good Tickets")
     st.info(
