@@ -1,0 +1,7 @@
+# Sensitive files to exclude
+.streamlit/
+secrets.toml
+*.pyc
+__pycache__/
+.env
+.DS_Store
