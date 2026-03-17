@@ -376,9 +376,6 @@ Analyze this ticket and provide feedback in this exact format:
 ✅ WHAT'S GOOD:
 • [List 2-3 good points]
 
-❌ ISSUES FOUND:
-• [List each problem]
-
 ✏️ IMPROVED TICKET (copy-paste ready):
 Summary: {arns[0] + ": " if arns else ""}[Clear issue type] - [Specific problem]
 
@@ -394,6 +391,12 @@ Evidence: [Attached: filename]
 
 📊 QUALITY SCORE: [X/10]
 • Compared to: [Which good example it resembles]
+
+✅ WHAT'S GOOD:
+• [List 2-3 good points]
+
+❌ ISSUES FOUND:
+• [List each problem]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
