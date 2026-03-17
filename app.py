@@ -429,29 +429,40 @@ Evidence: [Attached: filename]
                 st.markdown('<div class="feedback-box">', unsafe_allow_html=True)
                 st.markdown("### 🔍 AI Analysis Results")
                 st.markdown("---")
-                st.markdown(feedback)
+                
+                # Parse and display feedback with quality score in middle
+                quality_start = feedback.find('📊 QUALITY SCORE:')
+                if quality_start != -1:
+                    before = feedback[:quality_start].strip()
+                    
+                    # Display before (includes first good/bad)
+                    if before:
+                        st.markdown(before)
+                    
+                    # Extract and display quality score
+                    after = feedback[quality_start:].strip()
+                    score_match = re.search(r'QUALITY SCORE:?\s*(\d+)/?10', after)
+                    if score_match:
+                        score = int(score_match.group(1))
+                        st.markdown("---")
+                        st.markdown(f"### 📊 Quality Score: {score}/10")
+                        st.progress(score/10)
+                        
+                        # Color code based on score
+                        if score >= 8:
+                            st.success("🌟 Excellent ticket! Matches good examples")
+                        elif score >= 5:
+                            st.warning("📝 Needs improvement - be more specific")
+                        else:
+                            st.error("🔴 Poor ticket - don't batch multiple ARNs")
+                else:
+                    st.markdown(feedback)
                 
                 # Show ARN warning prominently
                 if multiple_arns:
                     st.error(f"❌ BAD PRACTICE: {len(arns)} ARNs found! Create ONE ticket per application. Found: {', '.join(arns[:3])}...")
                 else:
                     st.success("✅ GOOD: Single ARN detected")
-                
-                # Extract and display quality score
-                score_match = re.search(r'QUALITY SCORE:?\s*(\d+)/?10', feedback)
-                if score_match:
-                    score = int(score_match.group(1))
-                    st.markdown("---")
-                    st.markdown(f"### 📊 Quality Score: {score}/10")
-                    st.progress(score/10)
-                    
-                    # Color code based on score
-                    if score >= 8:
-                        st.success("🌟 Excellent ticket! Matches good examples")
-                    elif score >= 5:
-                        st.warning("📝 Needs improvement - be more specific")
-                    else:
-                        st.error("🔴 Poor ticket - don't batch multiple ARNs")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
                 
