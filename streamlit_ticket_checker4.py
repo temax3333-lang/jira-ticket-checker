@@ -3,10 +3,11 @@ from groq import Groq
 import pandas as pd
 from datetime import datetime
 import re
+import os
 
 # Page configuration
 st.set_page_config(
-    page_title="ACT Atlas-Topan Ticket Checker",
+    page_title="Atlas-Toppan Ticket Checker",
     page_icon="🔵",
     layout="wide"
 )
@@ -14,8 +15,7 @@ st.set_page_config(
 # Initialize Groq client
 @st.cache_resource
 def get_client():
-    import os
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+    return Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 client = get_client()
 
@@ -154,7 +154,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Header
-st.markdown('<h1 class="main-header">🔵 ACT Atlas-Topan Ticket Checker</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🔵 Atlas-Toppan Ticket Checker</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">🏢 System Support Team - 17-Step Workflow Integration</p>', unsafe_allow_html=True)
 
 # Display Critical Rule
@@ -294,7 +294,7 @@ if submitted:
                 
                 # Create the prompt with your real ticket examples
                 prompt = f"""
-You are an ACT Atlas-Topan System Support senior engineer who has analyzed 50+ real tickets.
+You are an Atlas-Toppan System Support senior engineer who has analyzed 50+ real tickets.
 
 GOOD TICKET EXAMPLES (use these as benchmarks):
 {GOOD_TICKET_EXAMPLES}
@@ -421,7 +421,7 @@ st.markdown("---")
 st.markdown(
     """
     <div style='text-align: center; color: #888;'>
-        ACT Atlas-Topan System Support Team • 17-Step Workflow • 
+        Atlas-Toppan System Support Team • 17-Step Workflow • 
         🔵 Validation = Ticket | 🟢 Adjudication = Follow up with ICS • One ARN = One Ticket
     </div>
     """,
