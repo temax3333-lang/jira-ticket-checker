@@ -12,6 +12,12 @@ st.set_page_config(
     layout="wide"
 )
 
+# Initialize session state for template population
+if 'template_summary' not in st.session_state:
+    st.session_state.template_summary = ""
+if 'template_description' not in st.session_state:
+    st.session_state.template_description = ""
+
 # Initialize Groq client
 @st.cache_resource
 def get_client():
@@ -43,8 +49,8 @@ WORKFLOW_MAPPING = {
 }
 
 # Rule for tickets
-VALIDATION_STEPS = [5, 7, 9]  # LEGACY_VALID, ABIS_VALID, WATCHLIST
-ADJUDICATION_STEPS = [6, 8, 10]  # LEGACY_ADJUD, MANUAL_ADJUD, WATCHLIST_ADJUD
+VALIDATION_STEPS = [5, 7, 9]
+ADJUDICATION_STEPS = [6, 8, 10]
 
 # Good ticket examples from your data
 GOOD_TICKET_EXAMPLES = [
@@ -74,7 +80,7 @@ BAD_TICKET_EXAMPLES = [
     }
 ]
 
-# Custom CSS (EXACTLY as provided)
+# Custom CSS
 st.markdown("""
 <style>
     .main-header {
@@ -94,10 +100,10 @@ st.markdown("""
     }
     .feedback-box {
         background-color: #1E1E1E;
-        padding: 2rem;
+        padding: 1.5rem;
         border-radius: 1rem;
         border-left: 5px solid #FF4B4B;
-        margin-top: 2rem;
+        margin-top: 1rem;
     }
     .validation-box {
         background-color: #1E3A5F;
@@ -113,27 +119,12 @@ st.markdown("""
         border-left: 5px solid #4CAF50;
         margin: 1rem 0;
     }
-    .good-section {
-        color: #00FF00;
-        font-weight: bold;
-    }
-    .fix-section {
-        color: #FFA500;
-        font-weight: bold;
-    }
     .stats-card {
         background: linear-gradient(135deg, #262730, #1E1E1E);
         padding: 1rem;
         border-radius: 0.5rem;
         text-align: center;
         border: 1px solid #FF4B4B;
-    }
-    .workflow-step {
-        background-color: #0E1117;
-        padding: 0.5rem;
-        border-radius: 0.3rem;
-        font-family: monospace;
-        border: 1px solid #333;
     }
     .rule-badge {
         display: inline-block;
@@ -149,6 +140,14 @@ st.markdown("""
     .adjudication-badge {
         background-color: #4CAF50;
         color: white;
+    }
+    /* Reduce spacing in feedback box */
+    .feedback-box p, .feedback-box div {
+        margin-bottom: 0.5rem;
+    }
+    .feedback-box h3 {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -189,28 +188,31 @@ col1, col2 = st.columns([2, 1])
 with col1:
     # Input form
     with st.form("ticket_form"):
-        summary = st.text_input("📝 Ticket Summary", placeholder="Include AAPP number if available...")
-        description = st.text_area("📝 Ticket Description", height=200, 
+        summary = st.text_input("📝 Ticket Summary", 
+                               value=st.session_state.template_summary,
+                               placeholder="Include AAPP number if available...")
+        description = st.text_area("📝 Ticket Description", 
+                                  value=st.session_state.template_description,
+                                  height=200, 
                                   placeholder="Include: Current stage (1-17), Issue details, Expected action, Location if relevant...")
         
         # Additional options
         with st.expander("⚙️ Advanced Options & Stage Selection"):
-            # Updated with your exact workflow names
             stage_options = list(WORKFLOW_MAPPING.values())
             
             current_stage = st.selectbox(
                 "Current Stage",
-                stage_options[:6]  # First 6
+                stage_options[:6]
             )
             
             current_stage2 = st.selectbox(
                 "Continued",
-                stage_options[6:12]  # Next 6
+                stage_options[6:12]
             )
             
             current_stage3 = st.selectbox(
                 "Final Stages",
-                stage_options[12:]  # Last 5
+                stage_options[12:]
             )
             
             ticket_type = st.selectbox(
@@ -230,7 +232,6 @@ with col2:
     # Quick stats and tips
     st.markdown("### 📊 Today's Stats")
     
-    # Initialize session state for stats if not exists
     if 'tickets_checked' not in st.session_state:
         st.session_state.tickets_checked = 0
         st.session_state.tickets_raised = 0
@@ -255,7 +256,6 @@ with col2:
                  "OTHER", "OTHER", "OTHER"]
     })
     
-    # Color code the dataframe
     def color_type(val):
         if val == "VALIDATION":
             return 'background-color: #2196F3; color: white'
@@ -285,14 +285,11 @@ if submitted:
     else:
         with st.spinner("🤔 Analyzing against 17-step workflow and 50+ real tickets..."):
             try:
-                # Extract ARNs
                 arns = re.findall(r'(AAPP|ACPP|AEPP|BSPP|AAPO|MSPP)\d+[A-Z0-9]+', description)
                 multiple_arns = len(arns) > 1
                 
-                # Get stage info
                 selected_full = current_stage if 'current_stage' in locals() else "Not specified"
                 
-                # Create the prompt with your real ticket examples
                 prompt = f"""
 You are an Atlas-Toppan System Support senior engineer who has analyzed 50+ real tickets.
 
@@ -338,7 +335,6 @@ Analyze this ticket and provide feedback in this exact format:
 🚀 ACTION REQUIRED:
 • [RAISE TICKET to technical team or FOLLOW UP with ICS Officers]
 
-
 ✏️ IMPROVED TICKET (based on ESD-27018, ESD-26996, ESD-27026):
 Summary: [Clear summary with ARN and issue type]
 
@@ -356,7 +352,6 @@ Description:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
                 
-                # Call Groq API
                 response = client.chat.completions.create(
                     model="llama-3.3-70b-versatile",
                     messages=[
@@ -369,18 +364,17 @@ Description:
                 
                 feedback = response.choices[0].message.content
                 
-                # Update stats
                 st.session_state.tickets_checked += 1
                 if multiple_arns:
                     st.session_state.follow_ups += 1
                 
-                # Display feedback in a nice box
+                # Display feedback with reduced spacing
                 st.markdown('<div class="feedback-box">', unsafe_allow_html=True)
                 st.markdown("### 🔍 AI Analysis Results")
-                st.markdown("---")
                 st.markdown(feedback)
+                st.markdown('</div>', unsafe_allow_html=True)
                 
-                # Show ARN warning prominently
+                # Show ARN warning
                 if multiple_arns:
                     st.error(f"❌ BAD PRACTICE: {len(arns)} ARNs found! Create ONE ticket per application. Found: {', '.join(arns[:3])}...")
                 else:
@@ -390,11 +384,9 @@ Description:
                 score_match = re.search(r'QUALITY SCORE:?\s*(\d+)/?10', feedback)
                 if score_match:
                     score = int(score_match.group(1))
-                    st.markdown("---")
                     st.markdown(f"### 📊 Quality Score: {score}/10")
                     st.progress(score/10)
                     
-                    # Color code based on score
                     if score >= 8:
                         st.success("🌟 Excellent ticket! Matches good examples like ESD-27018")
                     elif score >= 5:
@@ -402,9 +394,7 @@ Description:
                     else:
                         st.error("🔴 Poor ticket - don't batch multiple ARNs like the 'legacy stuck' example")
                 
-                st.markdown('</div>', unsafe_allow_html=True)
-                
-                # Add download button for feedback
+                # Add download button
                 st.download_button(
                     label="📥 Download Feedback",
                     data=feedback,
@@ -428,72 +418,334 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Sidebar with additional info
- # Add this in your sidebar section (around line 400-450)
+# Sidebar with templates only (no quick reference section)
 with st.sidebar:
     st.markdown("## 📚 50+ Quality Templates")
     
-    template_categories = {
-        "Photo Issues": ["Photo Too Large", "Photo Too Small", "Photo Background"],
-        "Stuck in Workflow": ["Stuck at DOCUMENT_ORDERED", "Stuck at ABIS", "Stuck at Watchlist"],
-        "Type Changes": ["Ordinary to Reissue (Lost)", "Expired to Lost", "Ordinary to Reissue (Expired)"],
-        "Biometric Issues": ["Merge Error", "Missing Biometrics", "Age Error"],
-        "Cancellations": ["With Supervisor Approval", "Duplicate Cancellation"],
-        "Data Correction": ["Name Spelling", "DOB Correction", "ID Number"],
-        "Payment Issues": ["Fee Correction", "Duplicate Payment", "Receipt Missing"]
+    # Complete template library
+    template_library = {
+        "Photo Issues": {
+            "Photo Too Large": {
+                "summary": "URGENT - Application Rejected: Photo Too Large",
+                "description": """AAPP4260C07777P
+
+This application was rejected from PERSO because: "Applicant's photo is too large"
+
+Please resize the photo according to passport specifications (35x45mm, 300 DPI) and reprocess.
+
+Attachment: rejected_photo.jpeg""",
+                "stage": "PERSO"
+            },
+            "Photo Too Small": {
+                "summary": "Photo Resize Required - Below Minimum Size",
+                "description": """ACPP52500B25A4P
+
+Application rejected at PERSO due to: "Photo dimensions below minimum requirement"
+
+Current photo: 30x40mm
+Required: 35x45mm minimum
+
+Please resize to meet ICAO standards and resubmit.
+
+Attachment: current_photo.jpeg""",
+                "stage": "PERSO"
+            },
+            "Photo Background": {
+                "summary": "Photo Background Correction Needed",
+                "description": """AAPP4260C222B6P
+
+Application flagged at biometric validation: "Photo background must be plain white"
+
+Current background shows pattern/shadow. Please replace with plain white background photo.
+
+Requirements:
+- Plain white background (RGB: 255,255,255)
+- No shadows
+- Even lighting
+
+Attachment: current_photo.jpeg""",
+                "stage": "BIOMETRIC"
+            }
+        },
+        
+        "Stuck in Workflow": {
+            "Stuck at DOCUMENT_ORDERED": {
+                "summary": "URGENT - Application Stuck at DOCUMENT_ORDERED (Step 12)",
+                "description": """ACPP525004E251P
+
+This application has been at DOCUMENT_ORDERED for 48+ hours. Normal processing time is 2-4 hours.
+
+Current Status:
+- Step: 12 (ORDERED - Backend)
+- Time stuck: 48 hours
+- ARN: ACPP525004E251P
+
+Please investigate and force-proceed if backend issue.
+
+Logs show: "Document generation queue timeout"
+
+Location: ADDIS ABABA""",
+                "stage": "ORDERED"
+            },
+            "Stuck at ABIS": {
+                "summary": "ABIS Validation Stuck - System Timeout",
+                "description": """ACPP5250056762P
+
+Application stuck at ABIS_VALID (Step 7) for 6 hours.
+
+Issue: ABIS system not responding to validation requests
+Step: 7 - ABIS_VALID
+Owner: VALIDATION
+
+Please check ABIS service and restart if needed. This is affecting multiple applications in queue.
+
+Screenshot attached: abis_timeout.png""",
+                "stage": "ABIS_VALID"
+            },
+            "Stuck at Watchlist": {
+                "summary": "Watchlist Validation Hung - System Check Required",
+                "description": """ACPP5250063A30P
+
+Application cannot proceed past WATCHLIST validation (Step 9).
+
+Error in logs: "Watchlist service connection refused"
+
+Please:
+1. Check watchlist service status
+2. Restart if necessary
+3. Force-proceed this application once service is restored
+
+Attachment: error_logs.txt""",
+                "stage": "WATCHLIST"
+            }
+        },
+        
+        "Type Changes": {
+            "Ordinary to Reissue (Lost)": {
+                "summary": "URGENT - Type Change: Ordinary to Reissue (Lost)",
+                "description": """ACPP52500B25A4P
+
+Application was initiated as Ordinary Passport. Applicant reported passport lost and needs Reissue - Lost.
+
+Current: Ordinary
+Requested: Reissue (Lost)
+
+Required changes:
+1. Update application type to "Reissue - Lost"
+2. Update fee calculation
+3. Add lost report reference: LOST/2024/1234
+
+Supporting documents attached:
+- Lost report.pdf
+- Applicant affidavit.pdf""",
+                "stage": "INITIATE"
+            },
+            "Expired to Lost": {
+                "summary": "URGENT - Status Change: EXPIRED TO LOST",
+                "description": """ACPP52500B25A4P
+
+This application was marked as EXPIRED but should be LOST.
+
+Current status: EXPIRED
+Correct status: LOST
+
+Please make the change and sync to KALITY to ensure proper workflow.
+
+Reason: Applicant reported passport lost before expiry date.
+
+Attachment: police_report.pdf""",
+                "stage": "INITIATE"
+            },
+            "Ordinary to Reissue (Expired)": {
+                "summary": "Application Type Change - Ordinary to Reissue (Expired)",
+                "description": """AAPP4260C222B6P
+
+Application was initiated as Ordinary Passport. Please update to Reissue - Document Expired.
+
+Current: Ordinary
+Requested: Reissue - Document Expired
+
+Reason: Applicant's passport expired on 2024-01-15
+
+Supporting document: expired_passport_copy.pdf""",
+                "stage": "INITIATE"
+            }
+        },
+        
+        "Biometric Issues": {
+            "Merge Error": {
+                "summary": "URGENT - Biometric Merge Error at Step 4",
+                "description": """BSPP202403001
+
+Biometric capture failed to merge with application.
+
+Error: "Biometric template merge failed - applicant ID mismatch"
+Step: 4 - BIOMETRIC
+Location: SEMERA Branch
+
+Applicant attempted biometric capture twice. System shows two separate records that need merging.
+
+Please merge biometric records and restart workflow.
+
+Attachments:
+- error_screenshot.png
+- biometric_logs.txt""",
+                "stage": "BIOMETRIC"
+            },
+            "Missing Biometrics": {
+                "summary": "Missing Biometrics - Application Incomplete",
+                "description": """MSPP202403089
+
+Application cannot proceed - no biometric data found.
+
+Step: 4 - BIOMETRIC
+Issue: "No fingerprints captured"
+
+Applicant was at SEMERA branch but system shows zero biometric records.
+
+Please verify if biometric device was working and recapture if possible.
+
+Location: SEMERA""",
+                "stage": "BIOMETRIC"
+            }
+        },
+        
+        "Cancellations": {
+            "With Supervisor Approval": {
+                "summary": "Application Cancellation Request - Supervisor Approved",
+                "description": """AAPP4260C07777P
+
+Request to cancel this application with supervisor approval.
+
+ARN: AAPP4260C07777P
+Reason: Applicant submitted duplicate application
+Supervisor: Alemitu Bekele (ID: AB2024)
+Approval ref: SUP/CANCEL/2024/089
+
+Please cancel and process refund if payment was made.
+
+Attached: supervisor_approval.pdf""",
+                "stage": "Any"
+            },
+            "Duplicate Cancellation": {
+                "summary": "URGENT - Cancel Duplicate Application",
+                "description": """ACPP52500564F6P
+
+Please cancel this application as it's a duplicate.
+
+Original valid application: ACPP52500564F6P
+Duplicate to cancel: ACPP52500564F7P
+
+Applicant created two applications by mistake. Keep the first one, cancel the second.
+
+Location: ADDIS ABABA""",
+                "stage": "Any"
+            }
+        },
+        
+        "Data Correction": {
+            "Name Spelling": {
+                "summary": "Data Correction - Name Spelling Error",
+                "description": """AAPP4260C222B6P
+
+Please correct name spelling in the system.
+
+Current: "Taddese Hailu"
+Correct: "Tadesse Hailu"
+
+Supporting document: passport_copy.pdf (shows correct spelling)
+
+This needs correction before printing.""",
+                "stage": "VERIFICATION"
+            },
+            "DOB Correction": {
+                "summary": "Date of Birth Correction Required",
+                "description": """ACPP5250063A30P
+
+Date of birth entered incorrectly during application.
+
+Current DOB: 1990-13-01 (invalid)
+Correct DOB: 1990-01-13
+
+Supporting evidence: birth_certificate.pdf attached
+
+Please correct in system and recalculate age if needed for fees.""",
+                "stage": "VERIFICATION"
+            }
+        },
+        
+        "Payment Issues": {
+            "Fee Correction": {
+                "summary": "Payment Fee Correction - Wrong Amount Charged",
+                "description": """AAPP4260C222B6P
+
+Incorrect fee charged for this application.
+
+Charged: 2000 ETB (Ordinary)
+Should be: 3000 ETB (Reissue - Lost)
+
+Please adjust payment and generate new receipt.
+
+Transaction ID: TXN20240315089
+Date: 2024-03-15""",
+                "stage": "PAYMENT"
+            },
+            "Duplicate Payment": {
+                "summary": "Duplicate Payment - Refund Request",
+                "description": """ACPP525004E251P
+
+Applicant made two payments for same application.
+
+Transaction 1: TXN20240315001 - 2000 ETB (successful)
+Transaction 2: TXN20240315002 - 2000 ETB (duplicate)
+
+Please cancel duplicate payment and process refund to original payment method.
+
+Receipts attached: both_transactions.pdf""",
+                "stage": "PAYMENT"
+            }
+        },
+        
+        "Status & Workflow Issues": {
+            "Wrong Status Update": {
+                "summary": "Status Update Error - Application Marked Complete Prematurely",
+                "description": """ACPP5250047AE3P
+
+Application incorrectly marked as COMPLETED (Step 17).
+
+Actual status: Should be at PRODUCED (Step 13)
+Card not yet printed/issued.
+
+Please revert status to PRODUCED and restart workflow.
+
+Location: ADDIS ABABA""",
+                "stage": "COMPLETED"
+            }
+        }
     }
     
-    selected_cat = st.selectbox("Choose category", list(template_categories.keys()))
+    # Category selection
+    main_category = st.selectbox("Select Category", list(template_library.keys()))
     
-    if selected_cat:
-        templates = template_categories[selected_cat]
-        selected_template = st.selectbox("Choose template", templates)
+    if main_category:
+        sub_category = st.selectbox("Select Template", list(template_library[main_category].keys()))
         
-        if st.button("Show Template"):
-            st.info(f"**Summary:** {selected_template}\n\n**Description:** [Full description from your templates]")
-
-#  with st.sidebar:
-#     st.markdown("## 📚 Quick Reference")
-    
-#     with st.expander("🔵 VALIDATION Stages (RAISE TICKET)"):
-#         st.markdown("""
-#         - **Step :** LEGACY_VALID
-#         - **Step :** ABIS_VALID  
-#         - **Step :** WATCHLIST
-        
-#         *If stuck → System issue → RAISE TICKET*
-#         """)
-    
-#     with st.expander("🟢 ADJUDICATION Stages (FOLLOW UP)"):
-#         st.markdown("""
-#         - **Step :** LEGACY_ADJUD
-#         - **Step :** MANUAL_ADJUD
-#         - **Step :** WATCHLIST_ADJUD
-        
-#         *If stuck → Officer issue → FOLLOW UP WITH ICS*
-#         """)
-    
-#     with st.expander("📋 Good Examples to Follow"):
-#         st.markdown("""
-#         **ESD-27018:** EXPIRED TO LOST
-#         - Single ARN, clear before/after
-        
-#         **ESD-26996:** Ordinary to Reissue
-#         - Single ARN, reason stated
-        
-#         **ESD-27026:** Rejected from PERSO
-#         - Exact error message included
-#         """)
-    
-#     with st.expander("📋 Bad Examples to Avoid"):
-#         st.markdown("""
-#         **"legacy stuck"**
-#         - 10 ARNs in one ticket
-#         - Generic description
-#         - No clear action
-#         """)
-    
-#     st.markdown("---")
-#     st.markdown("### 🆘 Need Help?")
-#     st.markdown("Contact: System Support Team")
-#     st.markdown("Guide: Ticket Creation Guide v1.0")
+        if sub_category:
+            template = template_library[main_category][sub_category]
+            
+            with st.expander("📋 Preview Template", expanded=True):
+                st.markdown(f"**Stage:** {template['stage']}")
+                st.markdown(f"**Summary:** {template['summary']}")
+                st.markdown("**Description:**")
+                st.text(template['description'])
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📝 Use This Template", use_container_width=True):
+                    st.session_state.template_summary = template['summary']
+                    st.session_state.template_description = template['description']
+                    st.rerun()
+            
+            with col2:
+                if st.button("📋 Copy to Clipboard", use_container_width=True):
+                    st.code(f"Summary: {template['summary']}\n\nDescription:\n{template['description']}")
