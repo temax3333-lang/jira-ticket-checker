@@ -4,9 +4,7 @@ import pandas as pd
 from datetime import datetime
 import re
 import os
-from dotenv import load_dotenv  # ← ADD THIS
 
-load_dotenv()  # ← ADD THIS (immediately after imports)
 
 
 # Page configuration
