@@ -1,0 +1,17 @@
+# Code Citations
+
+## License: unknown
+https://github.com/ngs/dotfiles/blob/aa2f24b72a1dc448a9c7df48cb3437db5556f8d9/setup.d/ubuntu/001-apt.sh
+
+```
+github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && sudo apt update &&
+```
+
+
+## License: MIT
+https://github.com/mblair/dotfiles/blob/b38168442b7c1b33423d78765eacc58585946a82/install.sh
+
+```
+github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && sudo apt update &&
+```
+

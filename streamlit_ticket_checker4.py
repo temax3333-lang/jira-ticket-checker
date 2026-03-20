@@ -429,23 +429,46 @@ st.markdown(
 )
 
 # Sidebar with additional info
+ # Add this in your sidebar section (around line 400-450)
 with st.sidebar:
+    st.markdown("## 📚 50+ Quality Templates")
+    
+    template_categories = {
+        "Photo Issues": ["Photo Too Large", "Photo Too Small", "Photo Background"],
+        "Stuck in Workflow": ["Stuck at DOCUMENT_ORDERED", "Stuck at ABIS", "Stuck at Watchlist"],
+        "Type Changes": ["Ordinary to Reissue (Lost)", "Expired to Lost", "Ordinary to Reissue (Expired)"],
+        "Biometric Issues": ["Merge Error", "Missing Biometrics", "Age Error"],
+        "Cancellations": ["With Supervisor Approval", "Duplicate Cancellation"],
+        "Data Correction": ["Name Spelling", "DOB Correction", "ID Number"],
+        "Payment Issues": ["Fee Correction", "Duplicate Payment", "Receipt Missing"]
+    }
+    
+    selected_cat = st.selectbox("Choose category", list(template_categories.keys()))
+    
+    if selected_cat:
+        templates = template_categories[selected_cat]
+        selected_template = st.selectbox("Choose template", templates)
+        
+        if st.button("Show Template"):
+            st.info(f"**Summary:** {selected_template}\n\n**Description:** [Full description from your templates]")
+
+ with st.sidebar:
     st.markdown("## 📚 Quick Reference")
     
     with st.expander("🔵 VALIDATION Stages (RAISE TICKET)"):
         st.markdown("""
-        - **Step 5:** LEGACY_VALID
-        - **Step 7:** ABIS_VALID  
-        - **Step 9:** WATCHLIST
+        - **Step :** LEGACY_VALID
+        - **Step :** ABIS_VALID  
+        - **Step :** WATCHLIST
         
         *If stuck → System issue → RAISE TICKET*
         """)
     
     with st.expander("🟢 ADJUDICATION Stages (FOLLOW UP)"):
         st.markdown("""
-        - **Step 6:** LEGACY_ADJUD
-        - **Step 8:** MANUAL_ADJUD
-        - **Step 10:** WATCHLIST_ADJUD
+        - **Step :** LEGACY_ADJUD
+        - **Step :** MANUAL_ADJUD
+        - **Step :** WATCHLIST_ADJUD
         
         *If stuck → Officer issue → FOLLOW UP WITH ICS*
         """)

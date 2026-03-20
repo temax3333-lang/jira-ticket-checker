@@ -453,8 +453,8 @@ Evidence: [Attached: filename]
                             st.success("🌟 Excellent ticket! Matches good examples")
                         elif score >= 5:
                             st.warning("📝 Needs improvement - be more specific")
-                        else:
-                            st.error("🔴 Poor ticket - don't batch multiple ARNs")
+                        # else:
+                        #     st.error("🔴 Poor ticket - don't batch multiple ARNs")
                 else:
                     st.markdown(feedback)
                 
@@ -496,18 +496,18 @@ with st.sidebar:
     
     with st.expander("🔵 VALIDATION Stages (RAISE TICKET)"):
         st.markdown("""
-        - **Step 5:** LEGACY_VALID
-        - **Step 7:** ABIS_VALID  
-        - **Step 9:** WATCHLIST
+        - **Step :** LEGACY_VALID
+        - **Step :** ABIS_VALID  
+        - **Step :** WATCHLIST
         
         *If stuck → System issue → RAISE TICKET*
         """)
     
     with st.expander("🟢 ADJUDICATION Stages (FOLLOW UP)"):
         st.markdown("""
-        - **Step 6:** LEGACY_ADJUD
-        - **Step 8:** MANUAL_ADJUD
-        - **Step 10:** WATCHLIST_ADJUD
+        - **Step :** LEGACY_ADJUD
+        - **Step :** MANUAL_ADJUD
+        - **Step :** WATCHLIST_ADJUD
         
         *If stuck → Officer issue → FOLLOW UP WITH ICS*
         """)
