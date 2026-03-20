@@ -452,48 +452,48 @@ with st.sidebar:
         if st.button("Show Template"):
             st.info(f"**Summary:** {selected_template}\n\n**Description:** [Full description from your templates]")
 
- with st.sidebar:
-    st.markdown("## 📚 Quick Reference")
+#  with st.sidebar:
+#     st.markdown("## 📚 Quick Reference")
     
-    with st.expander("🔵 VALIDATION Stages (RAISE TICKET)"):
-        st.markdown("""
-        - **Step :** LEGACY_VALID
-        - **Step :** ABIS_VALID  
-        - **Step :** WATCHLIST
+#     with st.expander("🔵 VALIDATION Stages (RAISE TICKET)"):
+#         st.markdown("""
+#         - **Step :** LEGACY_VALID
+#         - **Step :** ABIS_VALID  
+#         - **Step :** WATCHLIST
         
-        *If stuck → System issue → RAISE TICKET*
-        """)
+#         *If stuck → System issue → RAISE TICKET*
+#         """)
     
-    with st.expander("🟢 ADJUDICATION Stages (FOLLOW UP)"):
-        st.markdown("""
-        - **Step :** LEGACY_ADJUD
-        - **Step :** MANUAL_ADJUD
-        - **Step :** WATCHLIST_ADJUD
+#     with st.expander("🟢 ADJUDICATION Stages (FOLLOW UP)"):
+#         st.markdown("""
+#         - **Step :** LEGACY_ADJUD
+#         - **Step :** MANUAL_ADJUD
+#         - **Step :** WATCHLIST_ADJUD
         
-        *If stuck → Officer issue → FOLLOW UP WITH ICS*
-        """)
+#         *If stuck → Officer issue → FOLLOW UP WITH ICS*
+#         """)
     
-    with st.expander("📋 Good Examples to Follow"):
-        st.markdown("""
-        **ESD-27018:** EXPIRED TO LOST
-        - Single ARN, clear before/after
+#     with st.expander("📋 Good Examples to Follow"):
+#         st.markdown("""
+#         **ESD-27018:** EXPIRED TO LOST
+#         - Single ARN, clear before/after
         
-        **ESD-26996:** Ordinary to Reissue
-        - Single ARN, reason stated
+#         **ESD-26996:** Ordinary to Reissue
+#         - Single ARN, reason stated
         
-        **ESD-27026:** Rejected from PERSO
-        - Exact error message included
-        """)
+#         **ESD-27026:** Rejected from PERSO
+#         - Exact error message included
+#         """)
     
-    with st.expander("📋 Bad Examples to Avoid"):
-        st.markdown("""
-        **"legacy stuck"**
-        - 10 ARNs in one ticket
-        - Generic description
-        - No clear action
-        """)
+#     with st.expander("📋 Bad Examples to Avoid"):
+#         st.markdown("""
+#         **"legacy stuck"**
+#         - 10 ARNs in one ticket
+#         - Generic description
+#         - No clear action
+#         """)
     
-    st.markdown("---")
-    st.markdown("### 🆘 Need Help?")
-    st.markdown("Contact: System Support Team")
-    st.markdown("Guide: Ticket Creation Guide v1.0")
+#     st.markdown("---")
+#     st.markdown("### 🆘 Need Help?")
+#     st.markdown("Contact: System Support Team")
+#     st.markdown("Guide: Ticket Creation Guide v1.0")
