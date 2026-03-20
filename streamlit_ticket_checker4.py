@@ -422,7 +422,7 @@ st.markdown(
 
 # Sidebar with templates only (no quick reference section)
 with st.sidebar:
-    st.markdown("## 📚 100+ Quality Templates")
+    st.markdown("## 📚 50+ Quality Templates")
     
     # Complete template library
     template_library = {
